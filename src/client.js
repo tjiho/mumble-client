@@ -488,6 +488,18 @@ class MumbleClient extends EventEmitter {
     }
   }
 
+  _CryptSetup (payload) {
+  }
+
+  _CodecVersion (payload) {
+  }
+
+  _PermissionQuery (payload) {
+  }
+
+  _ServerConfig (payload) {
+  }
+
   /**
    * Disconnect from the remote server.
    * Once disconnected, this client may not be used again.
