@@ -488,16 +488,16 @@ class MumbleClient extends EventEmitter {
     }
   }
 
-  _CryptSetup (payload) {
+  _onCryptSetup (payload) {
   }
 
-  _CodecVersion (payload) {
+  _onCodecVersion (payload) {
   }
 
-  _PermissionQuery (payload) {
+  _onPermissionQuery (payload) {
   }
 
-  _ServerConfig (payload) {
+  _onServerConfig (payload) {
   }
 
   /**
