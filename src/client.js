@@ -117,6 +117,7 @@ class MumbleClient extends EventEmitter {
    * @param {object} [options.webrtc.required] - Failed connection if WebRTC unsupported by server
    * @param {object} [options.webrtc.mic] - MediaStream (or track) to use as local source of audio
    * @param {object} [options.webrtc.audioContext] - AudioContext to which remote nodes are connected
+   * @param {object} [options.webrtc.audioOutputReady] - callback with audio element
    */
   constructor (options) {
     super()
@@ -136,6 +137,7 @@ class MumbleClient extends EventEmitter {
     this._webrtcRequired = this._webrtcOptions.required
     this._webrtcMic = this._webrtcOptions.mic
     this._webrtcAudioCtx = this._webrtcOptions.audioContext
+    this._webrtcAudioOutputReady = this._webrtcOptions.audioOutputReady;
     if (this._webrtcSupported) {
       if (!this._webrtcMic || !this._webrtcAudioCtx) {
         throw Error('Need mic and audio context for WebRTC')
@@ -166,6 +168,9 @@ class MumbleClient extends EventEmitter {
         elem.srcObject = event.streams[0]
         elem.play()
         this.audioOutput = elem;
+        if (!!this._webrtcAudioOutputReady) {
+          this._webrtcAudioOutputReady(elem);
+        }
       }
     }
 
