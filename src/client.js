@@ -165,6 +165,7 @@ class MumbleClient extends EventEmitter {
         let elem = document.createElement('audio')
         elem.srcObject = event.streams[0]
         elem.play()
+        this.audioOutput = elem;
       }
     }
 
