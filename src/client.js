@@ -137,7 +137,7 @@ class MumbleClient extends EventEmitter {
     this._webrtcRequired = this._webrtcOptions.required
     this._webrtcMic = this._webrtcOptions.mic
     this._webrtcAudioCtx = this._webrtcOptions.audioContext
-    //this._webrtcAudioOutputReady = this._webrtcOptions.audioOutputReady
+    this._webrtcAudioOutputReady = this._webrtcOptions.audioOutputReady
 
     if (this._webrtcSupported) {
       if (!this._webrtcMic || !this._webrtcAudioCtx) {
