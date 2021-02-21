@@ -175,6 +175,9 @@ class MumbleClient extends EventEmitter {
         elem.play()
 
         this.webrtcStreams.push({'stream': stream, 'elem': elem});
+        if(!!this._webrtcAudioOutputReady) {
+          this._webrtcAudioOutputReady(this.webrtcStreams);
+        }
       }
     }
 
