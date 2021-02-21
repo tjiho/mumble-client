@@ -137,14 +137,16 @@ class MumbleClient extends EventEmitter {
     this._webrtcRequired = this._webrtcOptions.required
     this._webrtcMic = this._webrtcOptions.mic
     this._webrtcAudioCtx = this._webrtcOptions.audioContext
-    //this._webrtcAudioOutputReady = this._webrtcOptions.audioOutputReady;
+    //this._webrtcAudioOutputReady = this._webrtcOptions.audioOutputReady
+
     if (this._webrtcSupported) {
       if (!this._webrtcMic || !this._webrtcAudioCtx) {
         throw Error('Need mic and audio context for WebRTC')
       }
-      this._webrtcMixer = audioContext.createMediaStreamDestination();
+      this._webrtcMixer = this._webrtcAudioCtx.createMediaStreamDestination();
+
       let elem = document.createElement('audio')
-      elem.srcObject = event.streams[0];
+      elem.srcObject = this._webrtcMixer.stream;
       elem.play();
 
       this._webrtcSessionId = Date.now()
