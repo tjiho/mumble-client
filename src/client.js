@@ -172,7 +172,8 @@ class MumbleClient extends EventEmitter {
         // but Chrome apparently only supports webrtc+webaudio for input, not for output...
         // So instead we need to create <audio> elements for each stream:
         var stream = event.streams[0];
-        stream.connect(this._webrtcMixer);
+        var source = this._webrtcAudioCtx.createMediaStreamSource(stream);
+        source.connect(this._webrtcMixer);
       }
     }
 
