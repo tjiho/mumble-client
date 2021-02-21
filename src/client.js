@@ -137,11 +137,16 @@ class MumbleClient extends EventEmitter {
     this._webrtcRequired = this._webrtcOptions.required
     this._webrtcMic = this._webrtcOptions.mic
     this._webrtcAudioCtx = this._webrtcOptions.audioContext
-    this._webrtcAudioOutputReady = this._webrtcOptions.audioOutputReady;
+    //this._webrtcAudioOutputReady = this._webrtcOptions.audioOutputReady;
     if (this._webrtcSupported) {
       if (!this._webrtcMic || !this._webrtcAudioCtx) {
         throw Error('Need mic and audio context for WebRTC')
       }
+      this._webrtcMixer = audioContext.createChannelMerger();
+      let elem = document.createElement('audio')
+      elem.srcObject = event.streams[0];
+      elem.play();
+
       this._webrtcSessionId = Date.now()
       this._webrtcSessionVersion = 0
       this._pc = new window.RTCPeerConnection({
@@ -164,13 +169,8 @@ class MumbleClient extends EventEmitter {
         //   .connect(this._webrtcAudioCtx.destination)
         // but Chrome apparently only supports webrtc+webaudio for input, not for output...
         // So instead we need to create <audio> elements for each stream:
-        let elem = document.createElement('audio')
-        elem.srcObject = event.streams[0]
-        elem.play()
-        this.audioOutput = elem;
-        if (!!this._webrtcAudioOutputReady) {
-          this._webrtcAudioOutputReady(elem);
-        }
+        var stream = event.streams[0];
+        stream.connect(this._webrtcMixer);
       }
     }
 
