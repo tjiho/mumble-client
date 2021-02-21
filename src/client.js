@@ -145,11 +145,6 @@ class MumbleClient extends EventEmitter {
       }
       this.webrtcStreams = [];
 
-      let elem = document.createElement('audio')
-      elem.srcObject = this._webrtcMixer.stream;
-      elem.play();
-      this._webrtcAudioElem = elem;
-
       this._webrtcSessionId = Date.now()
       this._webrtcSessionVersion = 0
       this._pc = new window.RTCPeerConnection({
