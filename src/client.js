@@ -117,7 +117,8 @@ class MumbleClient extends EventEmitter {
    * @param {object} [options.webrtc.required] - Failed connection if WebRTC unsupported by server
    * @param {object} [options.webrtc.mic] - MediaStream (or track) to use as local source of audio
    * @param {object} [options.webrtc.audioContext] - AudioContext to which remote nodes are connected
-   * @param {object} [options.webrtc.audioOutputReady] - callback with audio element
+   * @param {object} [options.webrtc.onAddTrack] - callback track added
+   * @param {object} [options.webrtc.onRemoveTrack] - callback track removed
    */
   constructor (options) {
     super()
@@ -137,7 +138,8 @@ class MumbleClient extends EventEmitter {
     this._webrtcRequired = this._webrtcOptions.required
     this._webrtcMic = this._webrtcOptions.mic
     this._webrtcAudioCtx = this._webrtcOptions.audioContext
-    this._webrtcAudioOutputReady = this._webrtcOptions.audioOutputReady
+    this._webrtcOnAddTrack = options.webrtc.onAddTrack
+    this._webrtcOnRemoveTrack = options.webrtc.onRemoveTrack
 
     if (this._webrtcSupported) {
       if (!this._webrtcMic || !this._webrtcAudioCtx) {
@@ -168,15 +170,22 @@ class MumbleClient extends EventEmitter {
         // but Chrome apparently only supports webrtc+webaudio for input, not for output...
         // So instead we need to create <audio> elements for each stream:
         var stream = event.streams[0];
+
+
         var source = this._webrtcAudioCtx.createMediaStreamSource(stream);
 
         let elem = document.createElement('audio')
         elem.srcObject = stream;
         elem.play()
 
-        this.webrtcStreams.push({'stream': stream, 'elem': elem});
-        if(!!this._webrtcAudioOutputReady) {
-          this._webrtcAudioOutputReady(this.webrtcStreams);
+        if(!!this._webrtcOnAddTrack) {
+          this._webrtcOnAddTrack(stream, elem)
+        }
+
+        if(!!this._webrtcOnRemoveTrack) {
+          stream.onremovetrack = (removevent) => {
+            this._webrtcOnRemoveTrack(removevent.track, elem);
+          }
         }
       }
     }
