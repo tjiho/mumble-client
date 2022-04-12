@@ -4,6 +4,8 @@
   "description": "Mumble protocol client library",
   "main": "index.js",
   "scripts": {
+    "compile": "node_modules/.bin/babel -d lib/ src/",
+    "prepare": "npm run compile",
     "mocha": "node_modules/.bin/mocha --compilers js:babel-core/register",
     "test": "npm run compile && npm run mocha"
   },

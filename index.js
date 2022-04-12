@@ -1,1 +1,1 @@
-module.exports = require('./src/client.js').default
+module.exports = require('./lib/client.js').default
