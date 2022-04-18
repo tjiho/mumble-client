@@ -288,27 +288,24 @@ class MumbleClient extends EventEmitter {
     }).nodeify(callback)
   }
 
-  /**
-   * Connects this client to a duplex stream that is used for the voice channel.
-   * The provided duplex stream is expected to be valid and usable.
-   * The stream may be unreliable. That is, it may lose packets or deliver them
-   * out of order.
-   * It must however gurantee that packets arrive unmodified and/or are dropped
-   * when corrupted.
-   * It is also responsible for any encryption that is necessary.
-   *
-   * Connecting a voice channel is entirely optional. If no voice channel
-   * is connected, all voice data is tunneled through the data channel.
-   *
-   * @param stream - The stream used for the data channel.
-   * @returns {undefined}
-   */
-  connectVoiceStream (stream) {
-    // Connect the stream to the voice channel encoder and decoder
-    this._registerErrorHandler(stream)
-    this._voiceEncoder.pipe(stream).pipe(this._voiceDecoder)
-
-    // TODO: Ping packet
+  setTalkingState(talking = true, target = 0) {
+    if(talking)
+    {
+      this._webrtcMic.getAudioTracks()[0].enabled = true
+      this._send({
+        name: 'TalkingState',
+        payload: {
+          target: target
+        }
+      })
+    }
+    else {
+      this._webrtcMic.getAudioTracks()[0].enabled = false
+      this._send({
+        name: 'TalkingState',
+        payload: {}
+      })
+    }
   }
 
   createVoiceStream (target = 0, numberOfChannels = 1) {
@@ -328,56 +325,6 @@ class MumbleClient extends EventEmitter {
         })
       })
     }
-    if (!this._codecs) {
-      return DropStream.obj()
-    }
-    var voiceStream = through2.obj((chunk, encoding, callback) => {
-      if (chunk instanceof Buffer) {
-        chunk = new Float32Array(chunk.buffer, chunk.byteOffset, chunk.byteLength / 4)
-      }
-      if (chunk instanceof Float32Array) {
-        chunk = {
-          target: target,
-          pcm: chunk,
-          numberOfChannels: numberOfChannels
-        }
-      } else {
-        chunk = {
-          target: target,
-          pcm: chunk.pcm,
-          numberOfChannels: numberOfChannels,
-          position: { x: chunk.x, y: chunk.y, z: chunk.z }
-        }
-      }
-      let samples = this._samplesPerPacket || (chunk.pcm.length / numberOfChannels)
-      chunk.bitrate = this.getActualBitrate(samples, chunk.position != null)
-      callback(null, chunk)
-    })
-    const codec = 'Opus' // TODO
-    var seqNum = 0
-    voiceStream
-      .pipe(this._codecs.createEncoderStream(codec))
-      .on('data', data => {
-        let duration = this._codecs.getDuration(codec, data.frame) / 10
-        this._voice.write({
-          seqNum: seqNum,
-          codec: codec,
-          mode: target,
-          frames: [data.frame],
-          position: data.position,
-          end: false
-        })
-        seqNum += duration
-      }).on('end', () => {
-        this._voice.write({
-          seqNum: seqNum,
-          codec: codec,
-          mode: target,
-          frames: [],
-          end: true
-        })
-      })
-    return voiceStream
   }
 
   /**
